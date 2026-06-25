@@ -21,6 +21,9 @@ jobs:
             args: "--target aarch64-apple-darwin"
 
     runs-on: ${{ matrix.platform }}
+    # 让 GITHUB_TOKEN 具备创建 Release / 上传产物的写权限（默认只读会导致 403）
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: desktop-app
