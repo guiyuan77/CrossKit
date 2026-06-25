@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/*
+  CrossKit 主题 —— 自有配色，刻意区别于参考截图的紫黑风格。
+  采用「深石板蓝 + 青柠点缀」的中性专业风。
+*/
+:root {
+  --ck-bg: #0f1419;
+  --ck-surface: #161c24;
+  --ck-surface-2: #1e2630;
+  --ck-border: #2a3340;
+  --ck-text: #e6edf3;
+  --ck-text-dim: #8b98a5;
+  --ck-accent: #3fb6a8;
+  --ck-accent-hover: #4fcabb;
+  --ck-danger: #e5658a;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--ck-bg);
+  color: var(--ck-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei",
+    Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* 滚动条 */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--ck-border);
+  border-radius: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}

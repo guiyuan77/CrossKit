@@ -1,0 +1,37 @@
+# ===== 密钥 / 私密文件（绝不上传）=====
+openrouter.env
+*.env
+!*.env.example
+
+# ===== 依赖 / 构建产物 =====
+node_modules/
+dist/
+desktop-app/dist/
+desktop-app/node_modules/
+
+# ===== Rust / Tauri 构建产物 =====
+desktop-app/src-tauri/target/
+desktop-app/src-tauri/gen/
+
+# ===== 内置 ffmpeg 二进制（体积大，CI 自动下载）=====
+desktop-app/src-tauri/binaries/ffmpeg-*
+desktop-app/src-tauri/binaries/ffprobe-*
+
+# ===== 工作流运行产物 =====
+runs/*/
+inputs/*
+products/*
+!**/README.md
+!**/.gitignore
+
+# ===== 历史分析产物 / 大文件 =====
+analysis_frames/
+assets/
+*.mp4
+*.mov
+*.mkv
+
+# ===== 系统 / 编辑器 =====
+.DS_Store
+Thumbs.db
+*.log

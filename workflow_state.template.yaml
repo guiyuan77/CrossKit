@@ -1,0 +1,50 @@
+# 复制本文件为 runs/{你的项目名}/workflow_state.yaml 后开始使用
+# 任意 AI（含 CodeX）读取此文件即可知道当前进度与已有上下文
+
+workflow_id: ugc-talking-head-replica
+version: "1.0"
+run_id: ""  # 例: 20250623_wireless-earbuds
+created_at: ""
+updated_at: ""
+
+# --- 分支（启动时填写）---
+branches:
+  product_mode: info          # info | image_only（服饰等无文案时用 image_only）
+  ref_video_type: talking     # talking | non_talking（对标视频是否口播类）
+  target_market: US           # 目标市场，默认美国
+
+# --- 当前进度 ---
+current_step: start           # 见 UGC_WORKFLOW_SKILL.md 步骤编号
+steps_completed: []           # 例: [step0, step1, step2, step5]
+
+# --- 输入素材（路径相对本仓库根目录）---
+inputs:
+  ref_video: ""               # 对标视频，例: inputs/ref_video.mp4
+  product_info: ""            # 产品信息文本或 .md 路径
+  product_images: []          # 例: ["products/main.jpg"]
+  ref_video_screenshot: ""    # 对标截图，供参考图融合
+
+# --- 上下文变量（由各步产出，AI 续跑时读取）---
+artifacts:
+  爆款模块: ""
+  人物画像: ""
+  情绪顺序: ""
+  口播稿1: ""
+  口播稿2: ""
+  人物对话稿2: ""            # 仅 ref_video_type=non_talking 时需要
+  脚本1: ""
+  清洗版脚本: ""
+  裂变脚本列表: []            # 10 条变体
+  参考图路径: ""
+  成片路径列表: []            # Seedance 导出视频
+  tiktok文案列表: []
+
+# --- 外链操作记录（人手动填，便于追溯）---
+external_tools_log:
+  - step: ""
+    tool: ""                  # gemini | jimeng_image | jimeng_seedance | chatgpt_image
+    done_at: ""
+    notes: ""
+
+# --- 备注 ---
+notes: ""

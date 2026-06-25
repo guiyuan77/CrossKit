@@ -1,0 +1,58 @@
+name: build-desktop-app
+
+# 打 tag（如 v0.1.0）时触发；也可手动运行。
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            fetch: "npm run fetch:ffmpeg:win"
+            args: ""
+          - platform: macos-14 # Apple Silicon runner
+            fetch: "npm run fetch:ffmpeg:mac"
+            args: "--target aarch64-apple-darwin"
+
+    runs-on: ${{ matrix.platform }}
+    defaults:
+      run:
+        working-directory: desktop-app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-14' && 'aarch64-apple-darwin' || '' }}
+
+      - name: Install frontend deps
+        run: npm install
+
+      - name: Fetch bundled ffmpeg
+        run: ${{ matrix.fetch }}
+
+      - name: Build app + installer
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: desktop-app
+          args: ${{ matrix.args }}
+          tagName: ${{ github.ref_name }}
+          releaseName: "CrossKit ${{ github.ref_name }}"
+          releaseBody: "自动构建产物。Windows 下载 .exe，macOS 下载 .dmg。"
+          releaseDraft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

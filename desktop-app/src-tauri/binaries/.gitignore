@@ -1,0 +1,6 @@
+# ffmpeg/ffprobe 二进制体积大，不进 git。
+# 用 scripts/fetch-ffmpeg.* 下载到这里，CI 打包时也会自动下载。
+ffmpeg-*
+ffprobe-*
+!.gitignore
+!README.md
