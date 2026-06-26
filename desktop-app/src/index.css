@@ -44,3 +44,40 @@ body {
 *::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ── 表单控件美化 ── */
+
+/* 下拉框：去掉原生箭头（改用自绘 chevron 覆盖），并统一展开列表配色 */
+.ck-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+.ck-select:focus {
+  border-color: var(--ck-accent);
+}
+/* Chromium/WebView2 下可对原生展开列表的 option 上色 */
+.ck-select option {
+  background: var(--ck-surface-2);
+  color: var(--ck-text);
+}
+
+/* 数字输入框：隐藏原生上下小箭头（改用自绘 stepper 按钮） */
+.ck-number::-webkit-inner-spin-button,
+.ck-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.ck-number {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.ck-number:focus {
+  border-color: var(--ck-accent);
+}
+
+/* 文本输入聚焦态 */
+.ck-input:focus {
+  border-color: var(--ck-accent);
+}

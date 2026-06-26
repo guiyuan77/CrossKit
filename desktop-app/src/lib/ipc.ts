@@ -1,22 +1,31 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { open } from "@tauri-apps/plugin-dialog";
-import { openPath } from "@tauri-apps/plugin-opener";
+import { openPath, revealItemInDir } from "@tauri-apps/plugin-opener";
+
+export type VideoCodec = "h264" | "h265";
 
 export interface TranscodeParams {
   inputs: string[];
   outputDir: string | null;
   suffix: string;
-  width: number;
-  height: number;
-  fps: number;
+  codec: VideoCodec;
   crf: number;
   preset: string;
   audioBitrate: number;
+  smartCrop: boolean;
+  limit1080p: boolean;
+  keepFps: boolean;
+  fps: number;
   concurrency: number;
 }
 
-export type JobStatus = "pending" | "running" | "done" | "error";
+export type JobStatus =
+  | "pending"
+  | "running"
+  | "done"
+  | "error"
+  | "cancelled";
 
 export interface TranscodeProgress {
   file: string;
@@ -61,6 +70,11 @@ export function startTranscode(params: TranscodeParams): Promise<void> {
   return invoke("transcode_batch", { params });
 }
 
+/** 取消正在进行的批量转码 */
+export function cancelTranscode(): Promise<void> {
+  return invoke("cancel_transcode");
+}
+
 /** 订阅转码进度事件 */
 export function onTranscodeProgress(
   cb: (p: TranscodeProgress) => void,
@@ -68,7 +82,50 @@ export function onTranscodeProgress(
   return listen<TranscodeProgress>("transcode://progress", (e) => cb(e.payload));
 }
 
+export type LogLevel = "info" | "error";
+
+export interface LogLine {
+  level: LogLevel;
+  message: string;
+}
+
+/** 订阅后端运行日志（推送到 UI 日志面板） */
+export function onTranscodeLog(
+  cb: (line: LogLine) => void,
+): Promise<UnlistenFn> {
+  return listen<LogLine>("transcode://log", (e) => cb(e.payload));
+}
+
+export type VerifyStatus = "ok" | "warn" | "fail";
+
+export interface VerifyItem {
+  key: string;
+  label: string;
+  status: VerifyStatus;
+  expected: string;
+  actual: string;
+}
+
+export interface VerifyReport {
+  file: string;
+  outputPath: string;
+  overall: VerifyStatus;
+  items: VerifyItem[];
+}
+
+/** 订阅「处理后验证」报告 */
+export function onTranscodeVerify(
+  cb: (report: VerifyReport) => void,
+): Promise<UnlistenFn> {
+  return listen<VerifyReport>("transcode://verify", (e) => cb(e.payload));
+}
+
 /** 在系统文件管理器中打开目录 */
 export function openInExplorer(path: string): Promise<void> {
   return openPath(path);
+}
+
+/** 在文件管理器中定位并选中某个文件（打开其所在目录） */
+export function revealItem(path: string): Promise<void> {
+  return revealItemInDir(path);
 }

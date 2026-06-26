@@ -1,6 +1,6 @@
 # CrossKit 跨境工具箱
 
-一个轻量、可分发给团队的本地桌面工具箱。首发功能：**视频批量转换**（内置 ffmpeg，把竖屏短视频统一成 1080×1920/30fps 的平台友好规格）。架构模块化，方便后续加新功能。
+一个轻量、可分发给团队的本地桌面工具箱。首发功能：**视频批量重编码（防二次压缩）**——内置 ffmpeg，把视频重编码成高码率、规格对口的源，规避上传抖音/TikTok 时的二次压缩降质（默认保原分辨率/帧率，智能识别并去除黑边）。架构模块化，方便后续加新功能。
 
 技术栈：Tauri 2（Rust 外壳）+ React + TypeScript + Vite + Tailwind v4。
 
@@ -29,7 +29,7 @@
 - **为什么轻量**：Tauri 用操作系统自带的浏览器内核（Windows 的 WebView2 / macOS 的 WebView），不像 Electron 自带一整个 Chromium，所以包小、启动快、占内存少。
 - **前端 ↔ 后端怎么通信**：前端用 `invoke("命令名", 参数)` 调用 Rust 写的命令；Rust 用 `emit("事件名", 数据)` 把进度等实时推给前端，前端用 `listen` 接收。封装都在 `src/lib/ipc.ts`。
 - **ffmpeg 怎么来的**：作为 Tauri 的 “sidecar”（随程序打包的外部可执行文件）。运行时 Rust 调它来转码。同事装好就能用，不用自己装 ffmpeg。
-- **转码原理**：先用 `ffprobe` 读视频总时长，再用 `ffmpeg` 按 `等比放大→居中裁剪→统一帧率→重编码(H.264/AAC)` 处理；通过 `-progress` 输出实时算出百分比推给界面。并发由 Rust 的信号量（Semaphore）控制（默认 5 个同时转）。
+- **转码原理**：先用 `ffprobe` 读时长/宽高；可选用 `cropdetect` 探测黑边（有才裁）；再用 `ffmpeg` 以「低 CRF=高码率 + bt709 色彩标签 + +faststart」重编码（H.264/H.265 可选，AAC 音频），默认保留原分辨率与帧率；通过 `-progress` 实时算百分比推给界面。并发由 Rust 信号量（Semaphore）控制。
 
 ---
 
@@ -62,29 +62,52 @@ desktop-app/
 
 ---
 
-## 三、本地开发前的环境准备（重要）
+## 三、本地开发前的环境准备（一次性，装完永久可用）
 
-本机目前只有 Node，缺 **Rust** 和编译工具，必须先装好才能本地运行/打包：
+本地运行/打包需要以下工具链（本机已装好，换电脑时按此重装）：
 
-1. **Rust**：装 rustup（https://rustup.rs），或 `winget install Rustlang.Rustup`。
-2. **Windows C++ 构建工具**：安装 “Visual Studio Build Tools”，勾选 “使用 C++ 的桌面开发”。Tauri 在 Windows 上编译需要它。
-3. **WebView2**：Win10/11 基本自带；缺失时装包会自动补。
-4. **ffmpeg 二进制**：首次运行前执行 `npm run fetch:ffmpeg:win`（Mac 上是 `npm run fetch:ffmpeg:mac`），把 ffmpeg/ffprobe 下到 `src-tauri/binaries/`。
+1. **Node.js**（含 npm）。
+2. **Rust**：`winget install Rustlang.Rustup`，或装 rustup（https://rustup.rs）。装完确认 `rustc --version` / `cargo --version` 有输出。
+3. **Windows C++ 构建工具**：`winget install Microsoft.VisualStudio.2022.BuildTools --override "--quiet --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"`（约 4–7GB，Tauri 在 Windows 编译 Rust 必需）。
+4. **WebView2**：Win10/11 基本自带；缺失时装包会自动补。
 
-> 不想本机装 Rust 也行：直接用第六节的 GitHub Actions 云打包出安装包。但本地调试仍需要 Rust。
+> 装 Rust 后若当前终端找不到 `cargo`，是 PATH 未刷新——**新开一个终端**即可，或临时执行：`$env:Path += ";$env:USERPROFILE\.cargo\bin"`。
+>
+> 完全不想本机装 Rust：直接用第六节的 GitHub Actions 云打包出安装包；但本地热更新调试必须有 Rust。
 
 ---
 
-## 四、本地运行与开发
+## 四、本地开发预览（全套步骤，照着做就行）
+
+> 目标：打开真正的 App 窗口，改代码即时看到效果（前端秒级热刷新，Rust 改动自动增量重编译重启）。
 
 ```bash
+# 0) 进入子项目目录
 cd desktop-app
-npm install                 # 装前端依赖（已装过可跳过）
-npm run fetch:ffmpeg:win    # 下载内置 ffmpeg（首次）
-npm run tauri dev           # 启动开发模式（带热更新）
+
+# 1) 装前端依赖（仅首次 / 依赖有变动时）
+npm install
+
+# 2) 下载内置 ffmpeg/ffprobe 到 src-tauri/binaries/（★必做，否则编译报错）
+#    Windows：
+npm run fetch:ffmpeg:win
+#    macOS：
+#    npm run fetch:ffmpeg:mac
+
+# 3) 启动开发模式（带热更新，会自动弹出 App 窗口）
+npm run tauri dev
 ```
 
-只想看界面、不跑 Rust 时：`npm run dev` 仅启动网页部分（但调用后端的功能不可用）。
+**关键提醒（踩过的坑）：**
+
+- **第 2 步必须先做**。`tauri.conf.json` 声明了内置 ffmpeg sidecar，若 `src-tauri/binaries/` 里没有 `ffmpeg-<目标三元组>.exe`，`tauri dev` 会在打包前置步骤报错：`resource path ... doesn't exist`。ffmpeg 不进 git，所以**换电脑/清过 `binaries/` 后都要重跑一次**（已下载过则可跳过）。
+- **首次 `tauri dev` 很慢**（要下载并编译几百个 Rust 依赖，约 5–15 分钟）；之后有缓存，改动后增量重编译通常几十秒甚至更快。
+- **改前端**（`src/` 下的 React/TS）：保存即热刷新，App 窗口立刻更新。
+- **改后端**（`src-tauri/` 下的 Rust）：保存后自动增量重编译并重启 App。
+- **停止开发**：在运行 `tauri dev` 的终端按 `Ctrl + C`，或直接关掉 App 窗口。
+- **只调界面、不跑后端**：`npm run dev` 仅起网页部分（浏览器预览），但调用后端的功能（选文件、转码）会不可用，真正调试仍用 `npm run tauri dev`。
+
+**改完图标后**（`npm run tauri icon 你的图.png`）要看到新图标，需重新 `tauri build` 出包；`tauri dev` 的窗口图标在部分系统下需重启开发进程才刷新。
 
 ---
 

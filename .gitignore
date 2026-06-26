@@ -26,7 +26,8 @@ products/*
 
 # ===== 历史分析产物 / 大文件 =====
 analysis_frames/
-assets/
+# 只忽略仓库根目录的 assets/（存放临时大图等）；不要误伤 desktop-app/src/assets/
+/assets/
 *.mp4
 *.mov
 *.mkv
