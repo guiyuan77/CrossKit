@@ -143,8 +143,13 @@ npm run tauri build
 ### 推荐：GitHub Actions 云打包（Windows + Mac 一次出）
 1. 把整个项目推到 GitHub。
 2. 打一个 tag：`git tag v0.1.0 && git push --tags`。
-3. Actions 会用 Windows 和 macOS(Apple 芯片) 两台云机器各打一个包，自动下载 ffmpeg，产物放到 Releases（草稿）。
-4. 同事按系统下载：Windows 装 `.exe`，Mac 装 `.dmg`。
+3. Actions 会用 Windows 和 macOS(Apple 芯片) 两台云机器各打一个包，自动下载 ffmpeg，产物**自动发布**到 Releases（`releaseDraft: false`，无需手动 Publish）。
+4. 同事按系统下载：Windows 装 `-setup.exe`，Mac 装 `.dmg`。
+
+### 同事如何升级到新版（重要）
+- **不用先卸载旧版**。直接下载新版 `CrossKit_x.x.x_x64-setup.exe` 双击安装即可，NSIS 安装器会自动替换旧版本（原地升级）。
+- 个人设置/数据存放在 `%APPDATA%\com.crosskit.toolbox`，升级不会丢失。
+- 优先发 `-setup.exe`；`.msi` 也能原地升级。
 
 > CI 配置在仓库根目录 `.github/workflows/release.yml`。Mac 只出 Apple 芯片(arm64) 版（团队全是 Apple 芯片）。
 
@@ -167,3 +172,12 @@ npm run tauri build
 ## 八、与 UGC 工作流的关系
 
 本工具补的是 `../UGC_WORKFLOW_SKILL.md` 里「Seedance 出片之后、上传 TikTok 之前」的转码环节，二者配合使用。
+
+---
+
+## 九、路线图 / 待办（按优先级）
+
+- **[P1· 已做] 发布自动化**：CI 构建完成后自动发布 Release（`releaseDraft: false`），推 tag 即可在 Releases 看到最新版，无需手动 Publish。
+- **[P2· 待做] 应用内自动更新器（Tauri Updater）**：App 启动时检查新版本 → 弹窗提示 → 一键自动下载/安装/重启，同事无需手动去 GitHub 下载。
+  - 需要：`tauri-plugin-updater` + `@tauri-apps/plugin-updater`；`tauri signer generate` 生成签名密钥对（公钥进 `tauri.conf.json`，私钥与口令作为 GitHub Secret：`TAURI_SIGNING_PRIVATE_KEY` / `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`）；`tauri.conf` 开 `bundle.createUpdaterArtifacts` 并配置 `plugins.updater.endpoints`（指向 `latest.json`）；工作流 `tauri-action` 开 `includeUpdaterJson: true`。
+- **[P3· 记录] 产物同名覆盖边缘场景**：两个同目录、同名不同扩展名的源（如 `a.mov` 与 `a.mp4`）在相同后缀下可能生成同名 `.mp4` 产物而相互覆盖；后续可做产物去重/冲突提示。

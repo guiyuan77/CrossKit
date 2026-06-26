@@ -55,7 +55,8 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "CrossKit ${{ github.ref_name }}"
           releaseBody: "自动构建产物。Windows 下载 .exe，macOS 下载 .dmg。"
-          releaseDraft: true
+          # 构建完成后直接发布（不再停留在草稿），推 tag 即自动出现在 Releases 最新版
+          releaseDraft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
