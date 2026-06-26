@@ -13,6 +13,10 @@ desktop-app/node_modules/
 desktop-app/src-tauri/target/
 desktop-app/src-tauri/gen/
 
+# ===== 移动端图标（仅发桌面端，tauri icon 顺带生成的不纳入）=====
+desktop-app/src-tauri/icons/android/
+desktop-app/src-tauri/icons/ios/
+
 # ===== 内置 ffmpeg 二进制（体积大，CI 自动下载）=====
 desktop-app/src-tauri/binaries/ffmpeg-*
 desktop-app/src-tauri/binaries/ffprobe-*
