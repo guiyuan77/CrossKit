@@ -9,6 +9,8 @@
     "opener:allow-open-path",
     "dialog:default",
     "store:default",
+    "updater:default",
+    "process:default",
     {
       "identifier": "shell:allow-execute",
       "allow": [

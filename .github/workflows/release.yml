@@ -54,9 +54,14 @@ jobs:
           args: ${{ matrix.args }}
           tagName: ${{ github.ref_name }}
           releaseName: "CrossKit ${{ github.ref_name }}"
-          releaseBody: "自动构建产物。Windows 下载 .exe，macOS 下载 .dmg。"
+          releaseBody: "自动构建产物。Windows 下载 -setup.exe，macOS 下载 .dmg。装好后将自动检查更新。"
           # 构建完成后直接发布（不再停留在草稿），推 tag 即自动出现在 Releases 最新版
           releaseDraft: false
           prerelease: false
+          # 生成并上传 latest.json，供应用内自动更新器读取
+          includeUpdaterJson: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # 更新包签名：私钥与口令来自仓库 Secret（口令为空时该 Secret 可不设，解析为空字符串）
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}

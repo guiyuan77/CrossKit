@@ -2,6 +2,10 @@
 openrouter.env
 *.env
 !*.env.example
+# Tauri 更新签名私钥（仅本机与 GitHub Secret 保存）
+*.key
+*.key.pub
+*updater*.password.txt
 
 # ===== 依赖 / 构建产物 =====
 node_modules/

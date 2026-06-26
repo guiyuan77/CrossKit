@@ -1,8 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import { modules } from "./app/modules";
+import UpdateChecker from "./features/updater/UpdateChecker";
 
 export default function App() {
   const [activeId, setActiveId] = useState(modules[0]?.id);
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getVersion().then(setVersion).catch(() => {});
+  }, []);
 
   const mainModules = modules.filter((m) => (m.group ?? "main") === "main");
   const bottomModules = modules.filter((m) => m.group === "bottom");
@@ -58,7 +65,7 @@ export default function App() {
             className="px-3 pt-3 text-center text-[11px]"
             style={{ color: "var(--ck-text-dim)" }}
           >
-            CrossKit v0.1.0
+            CrossKit{version ? ` v${version}` : ""}
           </div>
         </nav>
       </aside>
@@ -67,6 +74,9 @@ export default function App() {
       <main className="flex-1 overflow-y-auto" style={{ background: "var(--ck-bg)" }}>
         {ActiveComponent ? <ActiveComponent /> : null}
       </main>
+
+      {/* 启动检查更新（有新版才弹窗） */}
+      <UpdateChecker />
     </div>
   );
 }
