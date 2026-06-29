@@ -1,6 +1,6 @@
 [package]
 name = "desktop-app"
-version = "0.2.0"
+version = "0.3.0"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -27,6 +27,12 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["sync", "macros", "rt"] }
 walkdir = "2"
+
+# LLM 网关：HTTP 客户端 + 适配器抽象 + 图片编码 + id
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "multipart"] }
+async-trait = "0.1"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
 
 # 自动更新与重启（仅桌面端，移动端不编译）
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]

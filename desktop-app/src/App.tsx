@@ -1,21 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { getVersion } from "@tauri-apps/api/app";
-import { modules } from "./app/modules";
+import { visibleModules, type AppModule } from "./app/modules";
 import UpdateChecker from "./features/updater/UpdateChecker";
+import AiStatusDot from "./features/settings/AiStatusDot";
 
 export default function App() {
-  const [activeId, setActiveId] = useState(modules[0]?.id);
+  const [activeId, setActiveId] = useState(visibleModules[0]?.id);
   const [version, setVersion] = useState("");
 
   useEffect(() => {
     getVersion().then(setVersion).catch(() => {});
   }, []);
 
-  const mainModules = modules.filter((m) => (m.group ?? "main") === "main");
-  const bottomModules = modules.filter((m) => m.group === "bottom");
+  const mainModules = visibleModules.filter((m) => (m.group ?? "main") === "main");
+  const bottomModules = visibleModules.filter((m) => m.group === "bottom");
 
   const ActiveComponent = useMemo(
-    () => modules.find((m) => m.id === activeId)?.component,
+    () => visibleModules.find((m) => m.id === activeId)?.component,
     [activeId],
   );
 
@@ -61,6 +62,9 @@ export default function App() {
               onClick={() => setActiveId(m.id)}
             />
           ))}
+          {visibleModules.some((m) => m.id === "settings") && (
+            <AiStatusDot onClick={() => setActiveId("settings")} />
+          )}
           <div
             className="px-3 pt-3 text-center text-[11px]"
             style={{ color: "var(--ck-text-dim)" }}
@@ -86,7 +90,7 @@ function NavItem({
   active,
   onClick,
 }: {
-  module: (typeof modules)[number];
+  module: AppModule;
   active: boolean;
   onClick: () => void;
 }) {

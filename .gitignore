@@ -7,6 +7,31 @@ openrouter.env
 *.key.pub
 *updater*.password.txt
 
+# ===== 本地文档 / 系统设计文档（不上传，只保留源代码）=====
+docs/
+PROJECT_STATUS.md
+UGC_WORKFLOW_SKILL.md
+ai短视频*.md
+README.md
+desktop-app/README.md
+
+# ===== Cursor / 本地 IDE 配置 =====
+.cursor/
+
+# ===== 本地工作流状态 / 个人配置（非应用源码）=====
+workflow_state.yaml
+workflow_state.template.yaml
+*.local.yaml
+*.local.json
+
+# ===== 本地工作目录（运行产物与素材，不上传）=====
+runs/
+inputs/
+products/
+analysis_frames/
+# 只忽略仓库根目录的 assets/（存放临时大图等）；不要误伤 desktop-app/src/assets/
+/assets/
+
 # ===== 依赖 / 构建产物 =====
 node_modules/
 dist/
@@ -25,20 +50,12 @@ desktop-app/src-tauri/icons/ios/
 desktop-app/src-tauri/binaries/ffmpeg-*
 desktop-app/src-tauri/binaries/ffprobe-*
 
-# ===== 工作流运行产物 =====
-runs/*/
-inputs/*
-products/*
-!**/README.md
-!**/.gitignore
-
-# ===== 历史分析产物 / 大文件 =====
-analysis_frames/
-# 只忽略仓库根目录的 assets/（存放临时大图等）；不要误伤 desktop-app/src/assets/
-/assets/
+# ===== 媒体大文件 =====
 *.mp4
 *.mov
 *.mkv
+*.wav
+*.mp3
 
 # ===== 系统 / 编辑器 =====
 .DS_Store
